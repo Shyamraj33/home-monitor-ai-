@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AegisHome AI - Intelligent Home Monitoring & Control</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+          AegisHome AI
+        </h1>
+        <p class="text-xs text-slate-400 flex items-center gap-1.5">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Core Online &bull; Alexa Ready &bull; Vision Active
+        </p>
+      </div>
+    </div>
+
+    <!-- Quick Stats & Alexa Guide Button -->
+    <div class="flex items-center gap-3">
+      <button id="btnAlexaGuide" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2 transition">
+        <i data-lucide="radio" class="w-4 h-4 text-indigo-400"></i>
+        <span>Alexa Skill Setup</span>
+      </button>
+      <div class="hidden sm:flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 px-3 py-1.5 rounded-lg text-xs">
+        <i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span id="headerSecurityStatus" class="text-slate-300 font-medium">Perimeter Armed</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Dashboard -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN: Camera Feed & Temperature Sensors (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col gap-6">
+      
+      <!-- Live Camera Card -->
+      <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-sm relative overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-rose-500/10 text-rose-400 rounded-lg">
+              <i data-lucide="cctv" class="w-4 h-4"></i>
+            </span>
+            <h2 class="text-sm font-semibold text-slate-200">Live Surveillance Feed</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnToggleWebcam" class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md text-slate-300 flex items-center gap-1.5 transition">
+              <i data-lucide="video" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span id="webcamBtnText">Use PC Webcam</span>
+            </button>
+            <button id="btnInspectCam" class="text-xs px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-200 rounded-md flex items-center gap-1.5 transition">
+              <i data-lucide="scan" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>Inspect AI</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Camera Container -->
+        <div class="relative aspect-video rounded-xl overflow-hidden bg-black border border-slate-800 flex items-center justify-center group">
+          <img id="cameraSnapshot" src="/api/camera/snapshot" alt="Security Camera Feed" class="w-full h-full object-cover">
+          <video id="liveVideo" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+          
+          <!-- Live badge -->
+          <div class="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[11px] font-mono text-rose-400 border border-rose-500/30">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span>LIVE CCTV</span>
+          </div>
+
+          <div class="absolute bottom-2 left-2 text-[10px] text-slate-400 font-mono bg-black/70 px-2 py-0.5 rounded">
+            ZONE: FRONT PORCH &bull; AI VISION ACTIVE
+          </div>
+        </div>
+
+        <div id="cameraAIReport" class="mt-3 text-xs text-slate-300 bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 hidden">
+          <div class="flex items-center gap-1.5 text-indigo-400 font-medium mb-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Vision Audit</span>
+          </div>
+          <p id="cameraAIReportText" class="text-slate-300 leading-relaxed"></p>
+        </div>
+      </section>
+
+      <!-- Temperature & Environment Grid -->
+      <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg">
+              <i data-lucide="thermometer" class="w-4 h-4"></i>
+            </span>
+            <h2 class="text-sm font-semibold text-slate-200">Environmental & Climate Monitoring</h2>
+          </div>
+          <button id="btnRefreshDevices" class="text-slate-400 hover:text-white transition" title="Refresh Sensors">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3" id="tempGrid">
+          <!-- Dynamically populated or default fallback -->
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+            <span class="text-xs text-slate-400 mb-1">Living Room</span>
+            <span id="temp-living_room" class="text-xl font-bold text-amber-300">23.5°C</span>
+            <span id="hum-living_room" class="text-[11px] text-slate-500 mt-0.5">48% Humidity</span>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+            <span class="text-xs text-slate-400 mb-1">Bedroom</span>
+            <span id="temp-bedroom" class="text-xl font-bold text-sky-300">22.0°C</span>
+            <span id="hum-bedroom" class="text-[11px] text-slate-500 mt-0.5">50% Humidity</span>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+            <span class="text-xs text-slate-400 mb-1">Outdoor</span>
+            <span id="temp-outdoor" class="text-xl font-bold text-emerald-300">28.4°C</span>
+            <span id="hum-outdoor" class="text-[11px] text-slate-500 mt-0.5">62% Humidity</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Security Checklist Card -->
+      <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+          <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
+          Perimeter Integrity
+        </h2>
+        <div class="space-y-2 text-xs" id="perimeterSummary">
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/40 border border-slate-800/80">
+            <span class="text-slate-300">All Doors Locked</span>
+            <span id="doorsLockStatusBadge" class="text-emerald-400 font-medium">Secured</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/40 border border-slate-800/80">
+            <span class="text-slate-300">All Windows Closed</span>
+            <span id="windowsStatusBadge" class="text-emerald-400 font-medium">Secured</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Chatbot & Device Interactive Control Deck (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-6">
+
+      <!-- AI Chatbot & Voice Assistant Card -->
+      <section class="bg-slate-900/60 border border-slate-800 rounded-2xl shadow-xl backdrop-blur-sm flex flex-col h-[480px]">
+        <!-- Chat Header -->
+        <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/40 rounded-t-2xl">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+              <i data-lucide="bot" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-semibold text-slate-200">Home Assistant AI</h2>
+              <p class="text-[11px] text-slate-400">Voice-enabled &bull; Natural Language Control</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnToggleSpeechOutput" class="text-xs px-2.5 py-1 rounded-md border border-slate-700 bg-slate-800 text-slate-300 flex items-center gap-1.5 hover:text-white transition" title="Toggle AI Voice Speech Output">
+              <i data-lucide="volume-2" id="speechOutputIcon" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span id="speechOutputLabel">Speech ON</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Message Log -->
+        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs md:text-sm">
+          <!-- Initial bot greeting -->
+          <div class="flex items-start gap-2.5 max-w-[85%]">
+            <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+            </div>
+            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-sm p-3 text-slate-200 shadow-sm leading-relaxed">
+              Hello! I am your <strong>AegisHome AI</strong> assistant. I can control lights, fans, doors, and windows, monitor temperatures, and inspect your camera feed.
+              <div class="mt-2 text-[11px] text-slate-400">
+                You can type a command, click the microphone to speak, or use Alexa!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Prompts Chips -->
+        <div class="px-4 py-2 bg-slate-950/40 border-t border-slate-800/60 flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[11px]">
+          <span class="text-slate-500 text-[10px] uppercase font-bold shrink-0">Try:</span>
+          <button class="quick-chip bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full whitespace-nowrap transition">"Turn on living room light"</button>
+          <button class="quick-chip bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full whitespace-nowrap transition">"Turn off all lights"</button>
+          <button class="quick-chip bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full whitespace-nowrap transition">"Lock front door"</button>
+          <button class="quick-chip bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full whitespace-nowrap transition">"What's the temperature?"</button>
+          <button class="quick-chip bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full whitespace-nowrap transition">"Check camera feed"</button>
+          <button class="quick-chip bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full whitespace-nowrap transition">"Good night mode"</button>
+        </div>
+
+        <!-- Chat Input Form with Voice Button -->
+        <form id="chatForm" class="p-3 border-t border-slate-800 bg-slate-900/90 rounded-b-2xl flex items-center gap-2">
+          <button type="button" id="btnVoiceInput" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition hover:text-indigo-400 shrink-0" title="Click to Speak Voice Command">
+            <i data-lucide="mic" id="voiceMicIcon" class="w-5 h-5"></i>
+          </button>
+          <input type="text" id="chatInput" placeholder="Ask anything or command lights, fans, doors, windows..." class="flex-1 bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs md:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+          <button type="submit" class="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 transition shrink-0">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </section>
+
+      <!-- DEVICE CONTROL DECK -->
+      <section class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
+        <h2 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+          <span class="p-1.5 bg-indigo-500/10 text-indigo-400 rounded-lg">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </span>
+          Direct Smart Device Actuators
+        </h2>
+
+        <!-- Tabs for Device Types -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <button data-tab="tab-lights" class="tab-btn active px-3 py-2 rounded-xl text-xs font-medium border border-indigo-500/40 bg-indigo-600/20 text-indigo-300 flex items-center justify-center gap-2 transition">
+            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+            <span>Lights</span>
+          </button>
+          <button data-tab="tab-fans" class="tab-btn px-3 py-2 rounded-xl text-xs font-medium border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+            <i data-lucide="fan" class="w-4 h-4"></i>
+            <span>Fans</span>
+          </button>
+          <button data-tab="tab-doors" class="tab-btn px-3 py-2 rounded-xl text-xs font-medium border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+            <i data-lucide="door-closed" class="w-4 h-4"></i>
+            <span>Doors</span>
+          </button>
+          <button data-tab="tab-windows" class="tab-btn px-3 py-2 rounded-xl text-xs font-medium border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+            <i data-lucide="app-window" class="w-4 h-4"></i>
+            <span>Windows</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: LIGHTS -->
+        <div id="tab-lights" class="tab-pane space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="lightsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: FANS -->
+        <div id="tab-fans" class="tab-pane hidden space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="fansContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: DOORS -->
+        <div id="tab-doors" class="tab-pane hidden space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="doorsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: WINDOWS -->
+        <div id="tab-windows" class="tab-pane hidden space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="windowsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Alexa Integration Modal -->
+  <div id="alexaModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative">
+      <button id="btnCloseAlexaModal" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+          <i data-lucide="radio" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-100">Connect to Amazon Alexa</h3>
+          <p class="text-xs text-slate-400">Alexa Skills Kit (ASK) Webhook Endpoint</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-300">
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+          <span class="text-slate-400 block mb-1 font-mono text-[11px]">Webhook Endpoint URL:</span>
+          <code class="text-indigo-300 font-mono text-xs select-all block bg-slate-900 p-2 rounded border border-slate-800">
+            https://&lt;your-domain-or-ngrok&gt;/api/alexa
+          </code>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-slate-200 mb-1">How to connect:</h4>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-400">
+            <li>Go to <a href="https://developer.amazon.com/alexa/console/ask" target="_blank" class="text-indigo-400 underline">Alexa Developer Console</a> & create a custom skill named <strong>"Home AI"</strong>.</li>
+            <li>In the <strong>Endpoint</strong> section, select <strong>HTTPS</strong> and paste your public webhook URL above.</li>
+            <li>Add sample utterances such as:
+              <ul class="list-disc list-inside ml-4 text-slate-300 mt-1 space-y-0.5">
+                <li><em>"Alexa, ask Home AI to turn on living room light"</em></li>
+                <li><em>"Alexa, ask Home AI what is the temperature"</em></li>
+                <li><em>"Alexa, ask Home AI to lock the front door"</em></li>
+                <li><em>"Alexa, ask Home AI to open the bedroom window"</em></li>
+                <li><em>"Alexa, ask Home AI to inspect the camera feed"</em></li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
